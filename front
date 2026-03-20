@@ -1,0 +1,410 @@
+JavaScript 篇
+1. 说说JavaScript中事件循环（Event Loop）的执行顺序？
+考察点： 异步编程、宏任务与微任务、代码执行结果分析。
+答案：
+JavaScript是单线程的，事件循环是其处理异步回调的机制。执行顺序如下：
+
+执行当前调用栈中的同步代码（也就是宏任务，如整个script）。
+
+执行完同步代码后，检查微任务队列，如果有微任务（如 Promise.then、MutationObserver、queueMicrotask），则清空整个微任务队列。
+
+从宏任务队列中取出一个任务执行（如 setTimeout、setInterval、I/O）。
+
+执行完一个宏任务后，再次检查并清空微任务队列。
+
+重复此过程，这就是事件循环。
+
+面试必杀技： 可以顺便举例 console.log(1); setTimeout(() => console.log(2)); Promise.resolve().then(() => console.log(3)); console.log(4); 的输出顺序是 1, 4, 3, 2 。
+
+2. 什么是闭包？在实际项目中有什么用？
+考察点： 作用域链、内存泄漏、模块化思想。
+答案：
+闭包是指一个函数能够访问其外部函数作用域中变量的能力（即使外部函数已经执行完毕）。
+实际应用场景：
+
+防抖/节流函数： 需要保存 timer 定时器 ID，防止被污染。
+
+Vue3 / React Hooks： 为什么 Hooks 能记住上一次的状态？底层原理依赖了闭包。
+
+创建私有变量： 模拟私有方法，实现数据隐藏和封装。
+
+避坑： 闭包使用不当可能导致内存泄漏（因为变量一直被引用，无法被垃圾回收）。解决方法是在不需要使用时，将引用置为 null 。
+
+📘 TypeScript 篇
+3. 说说interface（接口）与type（类型别名）的区别？
+考察点： 类型系统、扩展方式、使用场景。
+答案：
+两者在多数情况下可以互换，但核心区别在于：
+
+扩展方式： interface 使用 extends 继承，type 使用 & 实现交叉类型（联合类型）。
+
+重复定义： interface 支持声明合并（重名时会自动合并属性），而 type 不允许重复定义。
+
+适用范围： type 更灵活，可以定义原始类型（type Name = string）、联合类型（type ID = string | number）和元组。interface 更适合用于定义对象的形状，尤其是在面向对象编程或定义类的契约时。
+
+面试官追问： 如果是写Vue3组件库或库文件，推荐用 interface 还是 type？通常对于对外暴露的API，优先用 interface，因为它更稳定且支持声明合并，方便用户扩展 。
+
+4. 什么是类型守卫？如何自定义？
+考察点： 类型收缩、is 关键字。
+答案：
+类型守卫是一种在运行时检查以确保某个值属于特定类型的行为，它帮助TS在特定代码块中将变量推断为更具体的类型。
+
+内置守卫： typeof、instanceof、in 操作符。
+
+自定义守卫： 通过返回一个 参数名 is 类型 的谓词函数。
+
+typescript
+// 自定义守卫，判断是否是数组
+function isArray(value: any): value is any[] {
+  return Array.isArray(value);
+}
+
+function foo(value: string | string[]) {
+  if (isArray(value)) {
+    value.map(···); // 在此作用域内，TS 能确定 value 是数组类型
+  }
+}
+``` [citation:7]
+
+### 🧩 Element Plus 篇
+
+#### 5. 如何自定义Element Plus的主题色？
+**考察点：** 样式覆盖、SCSS变量、工程化配置。
+**答案：**
+Element Plus 支持灵活的样式定制，主要有两种方式：
+1.  **仅替换颜色（简单项目）：** 在 `vite.config.js` 或 `vue.config.js` 中，通过配置 `scss` 预处理器选项，覆盖 Element Plus 内部定义的 SCSS 变量，例如 `$--color-primary: #409EFF;` 改为自定义的颜色。
+2.  **全量样式覆盖（复杂项目）：** 使用官方提供的主题生成工具，或者创建一个自定义的 SCSS 文件，引入 Element Plus 的 SCSS 变量文件，并在引入前修改所有需要覆盖的变量。
+
+#### 6. 说说你在使用El-Table时，遇到过哪些性能问题？怎么解决的？
+**考察点：** 大数据渲染、虚拟滚动、树形表格。
+**答案：**
+当表格有上千行数据时，直接渲染会导致页面卡顿甚至崩溃，因为浏览器 DOM 节点过多。
+**解决方案：**
+1.  **分页：** 最简单有效的方式，前端分页或后端分页。
+2.  **虚拟滚动：** Element Plus 的 Table 组件支持虚拟滚动（需设置 `v-virtual-scroll` 指令或结合 `el-table-v2` 虚拟化表格组件）。它只渲染可视区域内的数据行，极大减少 DOM 节点数量。
+3.  **按需加载：** 如果是树形表格，使用懒加载模式，展开时再去请求子节点数据。
+
+### 🎨 Tailwind CSS 篇
+
+#### 7. Tailwind CSS相比传统CSS最大的区别是什么？
+**考察点：** 原子化CSS、实用优先、可维护性。
+**答案：**
+最大的区别在于**开发思想**的不同：
+*   **传统CSS（语义化）：** 我们倾向于先起一个类名（如 `.user-card`），然后在 CSS/SCSS 文件里定义这个类有哪些样式。
+*   **Tailwind（原子化/实用优先）：** 它提供大量的工具类（如 `flex`、`pt-4`、`text-center`），直接在 HTML/组件中组合这些类来实现样式，而不用离开模板去写自定义 CSS。
+*   **优势：** 避免了命名焦虑，减少了 CSS 文件体积（通过 PurgeCSS 摇树优化），样式与组件耦合更紧密，修改样式不用在多个文件间跳转 [citation:8]。
+
+#### 8. 在Tailwind中，如何复用一组复杂的样式类？
+**考察点：** `@apply` 指令、组件抽象、代码复用。
+**答案：**
+虽然 Tailwind 鼓励在模板中直接使用类，但当一组样式重复出现时，主要有两种复用方式：
+1.  **组件抽象（推荐）：** 如果是前端框架（如 Vue/React），可以将这组样式封装成一个单独的组件（如 `BaseButton.vue`），然后在各处引用该组件。
+2.  **使用 `@apply` 指令：** 在你的 CSS 文件中，可以通过 `@apply` 将多个工具类组合成一个自定义类。
+    ```css
+    .btn-primary {
+      @apply py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-700;
+    }
+这种方式适合需要兼容传统思路或在特定情况下简化类名列表 。
+
+💼 综合场景题
+9. 用Element Plus的Table组件展示数据，如何实现某一列根据条件显示不同颜色的Tag？
+考察点： 作用域插槽、动态类绑定、状态切换。
+答案：
+这属于典型的自定义列模板场景。
+
+在 el-table-column 中使用 v-slot 作用域插槽，获取当前行数据 row。
+
+根据 row 中的状态字段（如 status），动态绑定 el-tag 的 type 属性或自定义类名。
+
+vue
+<el-table-column prop="status" label="状态">
+  <template #default="{ row }">
+    <el-tag :type="row.status === '启用' ? 'success' : 'danger'">
+      {{ row.status }}
+    </el-tag>
+  </template>
+</el-table-column>
+10. 在Vue3 + TypeScript项目中，如何为Element Plus的组件实例添加类型声明？
+考察点： 类型导入、InstanceType、组件引用。
+答案：
+在 Vue3 中使用 <script setup> 配合 TS 时，如果要获取组件实例（例如通过 ref 调用 ElInput 的 focus() 方法），需要正确导入组件类型。
+
+首先从 element-plus 导入对应的组件类型。
+
+使用 InstanceType<typeof 组件> 来声明 ref 的类型。
+
+typescript
+import { ref } from 'vue'
+import { ElInput } from 'element-plus' // 导入组件
+
+// 声明一个 ref，其类型是 ElInput 的实例类型
+const inputRef = ref<InstanceType<typeof ElInput>>()
+
+// 使用
+const focusInput = () => {
+  inputRef.value?.focus()
+}
+这样写能有完美的 TS 类型提示和检查。
+
+
+
+
+1. 手写一个防抖函数（debounce）
+解题思路：
+
+核心： 返回一个函数，每次调用时清除之前的定时器，重新设置。
+
+进阶： 支持 immediate 参数（第一次立即执行），处理 this 指向和事件对象。
+
+javascript
+function debounce(func, wait, immediate = false) {
+  let timeout;
+  return function executedFunction(...args) {
+    const context = this;
+    const later = () => {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}
+2. 手写深拷贝（处理循环引用和特殊对象）
+解题思路：
+
+使用 WeakMap 存储已拷贝的对象，解决循环引用。
+
+判断对象类型：Object.prototype.toString.call(obj)。
+
+分别处理 Date、RegExp、Map、Set、Array 和普通对象。
+
+javascript
+function deepClone(obj, hash = new WeakMap()) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (hash.has(obj)) return hash.get(obj);
+  
+  let clone;
+  const Ctor = obj.constructor;
+  switch (Ctor) {
+    case Date:
+    case RegExp:
+      return new Ctor(obj);
+    case Map:
+      clone = new Map();
+      hash.set(obj, clone);
+      obj.forEach((value, key) => clone.set(deepClone(key, hash), deepClone(value, hash)));
+      return clone;
+    case Set:
+      clone = new Set();
+      hash.set(obj, clone);
+      obj.forEach(value => clone.add(deepClone(value, hash)));
+      return clone;
+    default:
+      clone = new Ctor();
+      hash.set(obj, clone);
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          clone[key] = deepClone(obj[key], hash);
+        }
+      }
+      return clone;
+  }
+}
+3. 实现 DeepPartial<T>
+解题思路： 递归使用映射类型和条件类型。
+
+typescript
+type DeepPartial<T> = T extends object ? {
+  [P in keyof T]?: DeepPartial<T[P]>;
+} : T;
+注意：需要处理函数、数组等情况，可进一步细化。
+
+4. 类型安全的 EventEmitter
+解题思路： 定义一个类型映射，泛型约束事件名与回调参数。
+
+typescript
+type EventMap = {
+  click: [x: number, y: number];
+  change: [newValue: string];
+  // ...
+};
+
+class EventEmitter<T extends Record<string, any[]>> {
+  private listeners: { [K in keyof T]?: ((...args: T[K]) => void)[] } = {};
+
+  on<K extends keyof T>(event: K, callback: (...args: T[K]) => void) {
+    if (!this.listeners[event]) this.listeners[event] = [];
+    this.listeners[event]!.push(callback);
+  }
+
+  emit<K extends keyof T>(event: K, ...args: T[K]) {
+    this.listeners[event]?.forEach(cb => cb(...args));
+  }
+}
+5. Element Plus 可编辑表格
+解题思路： 使用 el-table 的插槽，动态切换显示模式。
+
+为每个单元格绑定一个编辑状态（例如 editIndex 和 editProp）。
+
+在插槽内根据状态显示文本或 el-input，并监听 blur 或 keyup.enter 保存。
+
+vue
+<el-table-column prop="name" label="姓名">
+  <template #default="{ row, $index }">
+    <div v-if="editingIndex === $index && editingProp === 'name'">
+      <el-input v-model="row.name" @blur="stopEdit" @keyup.enter="stopEdit" />
+    </div>
+    <span v-else @click="startEdit($index, 'name')">{{ row.name }}</span>
+  </template>
+</el-table-column>
+6. 分片上传与断点续传（Element Plus Upload）
+解题思路：
+
+分片： 利用 File 对象的 slice 方法将文件切成多个块。
+
+上传： 并发上传分片，每个分片带序号、文件标识等。
+
+断点续传： 本地记录已上传分片（如 localStorage 或 IndexedDB），上传前先向后端查询已上传列表，跳过已上传的分片。
+
+Element Plus 集成： 使用 http-request 自定义上传方法覆盖默认行为。
+
+javascript
+// 自定义上传
+const customUpload = async (options) => {
+  const { file } = options;
+  const chunkSize = 2 * 1024 * 1024; // 2MB
+  const chunks = Math.ceil(file.size / chunkSize);
+  // 循环分片上传...
+};
+7. Tailwind 深色模式
+解题思路： 配置 tailwind.config.js 的 darkMode 为 'class' 或 'media'。
+
+media：根据系统主题自动切换（使用 @media (prefers-color-scheme: dark)）。
+
+class：手动控制，通过给父元素添加 dark 类来切换。
+
+在模板中使用 dark:bg-black 等变体。
+
+手动切换时，用 JS 操作 document.documentElement.classList.toggle('dark')。
+
+8. 响应式汉堡菜单
+解题思路： 使用 Tailwind 的响应式前缀（如 hidden md:flex）。
+
+PC端：md:flex 显示水平菜单。
+
+移动端：默认隐藏菜单，显示汉堡图标；点击图标用 v-show 控制菜单显示。
+
+vue
+<template>
+  <div>
+    <!-- 汉堡图标（移动端） -->
+    <button @click="menuOpen = !menuOpen" class="md:hidden">☰</button>
+    <!-- 导航菜单 -->
+    <ul :class="['md:flex', menuOpen ? 'block' : 'hidden']">
+      <li>首页</li>
+      ...
+    </ul>
+  </div>
+</template>
+9. 通用对话框组件设计
+解题思路： 封装 el-dialog，暴露 v-model 控制显示。
+
+异步关闭： 在确定按钮上绑定异步函数，使用 loading 状态防止重复点击，完成后关闭对话框。
+
+自定义内容： 使用插槽 (#default)。
+
+拖拽： 可以自定义指令或使用 vue-draggable 等库，监听标题栏的鼠标事件修改对话框位置。
+
+vue
+<template>
+  <el-dialog v-model="visible" :before-close="handleClose" draggable>
+    <template #header>...</template>
+    <slot></slot>
+    <template #footer>
+      <slot name="footer" :confirm="confirm" :cancel="cancel">
+        <el-button @click="cancel">取消</el-button>
+        <el-button type="primary" :loading="loading" @click="confirm">确定</el-button>
+      </slot>
+    </template>
+  </el-dialog>
+</template>
+10. 项目组织与架构设计
+解题思路： 给出典型的目录结构和关键配置。
+
+text
+src/
+├── types/               # 全局 TS 类型声明
+│   ├── api.d.ts         # API 接口返回类型
+│   ├── global.d.ts      # 全局变量/类型扩展
+│   └── components.d.ts  # 组件类型（自动生成）
+├── utils/               # 工具函数
+│   ├── request.ts       # axios 封装
+│   └── storage.ts       # 本地存储
+├── styles/              # 样式
+│   ├── main.css         # 入口样式（包含 Tailwind 指令）
+│   └── variables.css    # CSS 变量（主题色等）
+├── composables/         # 可组合逻辑
+├── components/          # 公共组件
+├── views/               # 页面
+└── plugins/             # 插件配置（Element Plus 按需引入、自定义插件）
+关键点：
+
+TS 配置 compilerOptions 开启 strict，路径别名。
+
+Tailwind 配置 content 包含所有模板文件。
+
+Element Plus 按需引入，配合 unplugin-vue-components 自动解析组件和类型。
+
+
+
+1. Vue 3 的生命周期钩子（Options API）
+beforeCreate：实例初始化后，数据观测和事件配置之前。此时 data、computed、methods 都不可用。
+
+created：实例创建完成后，可访问 data、computed、methods，但尚未挂载 DOM，$el 不可用。
+
+beforeMount：挂载开始之前，模板编译完成，但尚未将真实 DOM 替换到 $el。
+
+mounted：实例挂载到 DOM 上，可以访问 $el，可进行 DOM 操作。
+
+beforeUpdate：响应式数据更新时，虚拟 DOM 重新渲染和打补丁之前调用。
+
+updated：数据更改导致虚拟 DOM 重新渲染和打补丁之后调用。注意不要在此修改数据，避免无限循环。
+
+beforeUnmount（Vue 3）/ beforeDestroy（Vue 2）：实例销毁之前调用，此时实例仍然完全可用。
+
+unmounted（Vue 3）/ destroyed（Vue 2）：实例销毁后调用，所有事件监听、子实例都会被移除。
+
+Vue 3 新增调试钩子：
+
+renderTracked：跟踪虚拟 DOM 重新渲染时调用。
+
+renderTriggered：当虚拟 DOM 重新渲染被触发时调用。
+
+2. Composition API 中的生命周期
+使用 onBeforeMount、onMounted、onBeforeUpdate、onUpdated、onBeforeUnmount、onUnmounted 等。
+
+beforeCreate 和 created 被 setup() 本身替代（因为 setup 执行时机就在这两个钩子之前）。
+
+3. 父子组件生命周期执行顺序（关键考点）
+加载渲染过程：
+父 beforeCreate → 父 created → 父 beforeMount → 子 beforeCreate → 子 created → 子 beforeMount → 子 mounted → 父 mounted
+即：父组件等待所有子组件挂载完成后，自身才完成挂载。
+
+更新过程（父组件更新引起）：
+父 beforeUpdate → 子 beforeUpdate → 子 updated → 父 updated
+父更新前会先触发子更新。
+
+销毁过程：
+父 beforeUnmount → 子 beforeUnmount → 子 unmounted → 父 unmounted
+父销毁前先销毁子组件。
+
+4. 常见面试追问
+在哪个生命周期可以访问 DOM？ mounted 及之后。
+
+在哪个生命周期可以发起异步请求？ 通常 created 或 mounted 都可以，但 created 更早，能减少白屏时间。
+
+为什么不在 beforeCreate 里请求？ 因为此时 data 未初始化，无法将数据赋值给响应式数据。
+
+父子组件 mounted 顺序为什么先子后父？ 因为组件树是深度优先遍历：父组件开始挂载，发现子组件，先完成子组件的挂载，最后才回溯完成父组件的挂载。
