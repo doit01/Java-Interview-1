@@ -1,4 +1,4 @@
-JavaScript 篇
+ JavaScript 篇
 1. 说说JavaScript中事件循环（Event Loop）的执行顺序？
 考察点： 异步编程、宏任务与微任务、代码执行结果分析。
 答案：
@@ -149,7 +149,7 @@ const focusInput = () => {
 
 
 
-1. 手写一个防抖函数（debounce）
+11. 手写一个防抖函数（debounce）
 解题思路：
 
 核心： 返回一个函数，每次调用时清除之前的定时器，重新设置。
@@ -171,7 +171,7 @@ function debounce(func, wait, immediate = false) {
     if (callNow) func.apply(context, args);
   };
 }
-2. 手写深拷贝（处理循环引用和特殊对象）
+12. 手写深拷贝（处理循环引用和特殊对象）
 解题思路：
 
 使用 WeakMap 存储已拷贝的对象，解决循环引用。
@@ -212,7 +212,7 @@ function deepClone(obj, hash = new WeakMap()) {
       return clone;
   }
 }
-3. 实现 DeepPartial<T>
+13. 实现 DeepPartial<T>
 解题思路： 递归使用映射类型和条件类型。
 
 typescript
@@ -221,7 +221,7 @@ type DeepPartial<T> = T extends object ? {
 } : T;
 注意：需要处理函数、数组等情况，可进一步细化。
 
-4. 类型安全的 EventEmitter
+14. 类型安全的 EventEmitter
 解题思路： 定义一个类型映射，泛型约束事件名与回调参数。
 
 typescript
@@ -243,7 +243,7 @@ class EventEmitter<T extends Record<string, any[]>> {
     this.listeners[event]?.forEach(cb => cb(...args));
   }
 }
-5. Element Plus 可编辑表格
+15. Element Plus 可编辑表格
 解题思路： 使用 el-table 的插槽，动态切换显示模式。
 
 为每个单元格绑定一个编辑状态（例如 editIndex 和 editProp）。
@@ -259,7 +259,7 @@ vue
     <span v-else @click="startEdit($index, 'name')">{{ row.name }}</span>
   </template>
 </el-table-column>
-6. 分片上传与断点续传（Element Plus Upload）
+16. 分片上传与断点续传（Element Plus Upload）
 解题思路：
 
 分片： 利用 File 对象的 slice 方法将文件切成多个块。
@@ -278,7 +278,7 @@ const customUpload = async (options) => {
   const chunks = Math.ceil(file.size / chunkSize);
   // 循环分片上传...
 };
-7. Tailwind 深色模式
+17. Tailwind 深色模式
 解题思路： 配置 tailwind.config.js 的 darkMode 为 'class' 或 'media'。
 
 media：根据系统主题自动切换（使用 @media (prefers-color-scheme: dark)）。
@@ -289,7 +289,7 @@ class：手动控制，通过给父元素添加 dark 类来切换。
 
 手动切换时，用 JS 操作 document.documentElement.classList.toggle('dark')。
 
-8. 响应式汉堡菜单
+18. 响应式汉堡菜单
 解题思路： 使用 Tailwind 的响应式前缀（如 hidden md:flex）。
 
 PC端：md:flex 显示水平菜单。
@@ -308,7 +308,7 @@ vue
     </ul>
   </div>
 </template>
-9. 通用对话框组件设计
+19. 通用对话框组件设计
 解题思路： 封装 el-dialog，暴露 v-model 控制显示。
 
 异步关闭： 在确定按钮上绑定异步函数，使用 loading 状态防止重复点击，完成后关闭对话框。
@@ -330,7 +330,7 @@ vue
     </template>
   </el-dialog>
 </template>
-10. 项目组织与架构设计
+20. 项目组织与架构设计
 解题思路： 给出典型的目录结构和关键配置。
 
 text
@@ -359,7 +359,7 @@ Element Plus 按需引入，配合 unplugin-vue-components 自动解析组件和
 
 
 
-1. Vue 3 的生命周期钩子（Options API）
+21. Vue 3 的生命周期钩子（Options API）
 beforeCreate：实例初始化后，数据观测和事件配置之前。此时 data、computed、methods 都不可用。
 
 created：实例创建完成后，可访问 data、computed、methods，但尚未挂载 DOM，$el 不可用。
@@ -382,12 +382,12 @@ renderTracked：跟踪虚拟 DOM 重新渲染时调用。
 
 renderTriggered：当虚拟 DOM 重新渲染被触发时调用。
 
-2. Composition API 中的生命周期
+22. Composition API 中的生命周期
 使用 onBeforeMount、onMounted、onBeforeUpdate、onUpdated、onBeforeUnmount、onUnmounted 等。
 
 beforeCreate 和 created 被 setup() 本身替代（因为 setup 执行时机就在这两个钩子之前）。
 
-3. 父子组件生命周期执行顺序（关键考点）
+23. 父子组件生命周期执行顺序（关键考点）
 加载渲染过程：
 父 beforeCreate → 父 created → 父 beforeMount → 子 beforeCreate → 子 created → 子 beforeMount → 子 mounted → 父 mounted
 即：父组件等待所有子组件挂载完成后，自身才完成挂载。
@@ -400,7 +400,7 @@ beforeCreate 和 created 被 setup() 本身替代（因为 setup 执行时机就
 父 beforeUnmount → 子 beforeUnmount → 子 unmounted → 父 unmounted
 父销毁前先销毁子组件。
 
-4. 常见面试追问
+24. 常见面试追问
 在哪个生命周期可以访问 DOM？ mounted 及之后。
 
 在哪个生命周期可以发起异步请求？ 通常 created 或 mounted 都可以，但 created 更早，能减少白屏时间。
