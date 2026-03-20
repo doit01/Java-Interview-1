@@ -408,3 +408,315 @@ beforeCreate 和 created 被 setup() 本身替代（因为 setup 执行时机就
 为什么不在 beforeCreate 里请求？ 因为此时 data 未初始化，无法将数据赋值给响应式数据。
 
 父子组件 mounted 顺序为什么先子后父？ 因为组件树是深度优先遍历：父组件开始挂载，发现子组件，先完成子组件的挂载，最后才回溯完成父组件的挂载。
+
+
+
+
+布局
+ CSS 布局（Flex / Grid / Tailwind）必备 10 题
+题目	核心考察点
+1. Flex 布局的核心概念是什么？请解释 flex container 和 flex item 的常用属性。	Flex 容器与项目属性、主轴交叉轴
+2. 如何使用 Flex 实现一个完美的垂直水平居中？	居中布局、justify-content、align-items
+3. Flex 布局中 flex: 1 是什么意思？它与 flex-grow、flex-shrink、flex-basis 的关系？	flex 简写属性、伸缩计算
+4. 如何用 Flex 实现一个等分布局（比如每行 3 列，间距相等）？	等高、间距、flex-basis
+5. Grid 布局和 Flex 布局有什么区别？分别在什么场景下使用？	一维 vs 二维布局、适用场景
+6. 如何使用 CSS Grid 实现一个经典的“圣杯布局”（header, footer, 三栏内容）？	Grid 区域、响应式
+7. Tailwind CSS 中如何快速实现 Flex 布局？请列举常用的 Flex 相关类名。	Tailwind 实用类、flex 系列
+8. 在 Tailwind 中如何实现响应式布局？例如在大屏时一行显示 4 列，在小屏时显示 2 列。	响应式断点、栅格系统
+9. 说说你对 BFC（块级格式化上下文）的理解，以及它如何帮助解决布局问题？	清除浮动、防止 margin 塌陷
+10. 实现一个左侧固定宽度，右侧自适应的两栏布局，你能写出几种方法？	多种布局方案（flex、float、grid、calc）
+1. Flex 布局的核心概念是什么？请解释 flex container 和 flex item 的常用属性。
+考察点： Flex 基础、容器与项目属性
+
+答案要点：
+
+核心概念：Flex 布局是一种一维布局模型，可以在主轴和交叉轴上灵活控制子元素的排列、对齐、伸缩。
+
+容器属性（设置在父元素上）：
+
+display: flex / inline-flex：定义 flex 容器。
+
+flex-direction：主轴方向（row 默认、column）。
+
+flex-wrap：是否换行。
+
+justify-content：主轴对齐方式（flex-start、flex-end、center、space-between、space-around、space-evenly）。
+
+align-items：交叉轴对齐方式（stretch 默认、center、flex-start、flex-end、baseline）。
+
+align-content：多根轴线对齐（当换行时有效）。
+
+项目属性（设置在子元素上）：
+
+order：排列顺序。
+
+flex-grow：放大比例（默认 0，不放大）。
+
+flex-shrink：缩小比例（默认 1，空间不足时缩小）。
+
+flex-basis：项目在分配多余空间前的初始大小。
+
+flex：是 grow、shrink、basis 的简写（常用 flex: 1 表示等分剩余空间）。
+
+align-self：覆盖容器的 align-items。
+
+2. 如何使用 Flex 实现一个完美的垂直水平居中？
+考察点： 居中布局
+
+答案要点：
+
+css
+.container {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center;     /* 垂直居中 */
+  height: 100vh;           /* 容器需要有高度 */
+}
+对于单行文本或行内元素，也可以使用 text-align: center 配合 line-height 实现，但 Flex 是最通用且简单的方法。
+
+注意：容器必须设置高度，否则 align-items: center 无法感知垂直居中（高度由内容撑开时，居中效果不明显）。
+
+3. Flex 布局中 flex: 1 是什么意思？它与 flex-grow、flex-shrink、flex-basis 的关系？
+考察点： flex 简写属性、伸缩计算
+
+答案要点：
+
+flex: 1 是以下属性的简写：
+
+flex-grow: 1 （可以放大，占据多余空间）
+
+flex-shrink: 1 （空间不足时可以缩小）
+
+flex-basis: 0% （初始大小为 0，让所有可伸缩项目平均分配剩余空间）
+
+常见值：
+
+flex: 0 1 auto（默认值）：不放大，可缩小，初始大小由内容决定。
+
+flex: 1 1 auto：可放大可缩小，初始大小由内容决定（等价于 flex: auto）。
+
+flex: 1 1 0%：可放大可缩小，初始大小为 0，用于等分剩余空间（即 flex: 1）。
+
+作用：flex: 1 通常用于让多个子元素平分容器的剩余宽度（或高度），常用于等分布局。
+
+4. 如何用 Flex 实现一个等分布局（比如每行 3 列，间距相等）？
+考察点： 等分、间距处理
+
+答案要点：
+
+html
+<div class="container">
+  <div class="item">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+</div>
+css
+.container {
+  display: flex;
+  gap: 20px;        /* 使用 gap 设置间距（推荐） */
+  flex-wrap: wrap;   /* 允许换行 */
+}
+.item {
+  flex: 1 1 0;       /* 或者 flex: 1; 让每个项目等分剩余空间 */
+  min-width: 200px;  /* 可选，防止过小 */
+}
+如果每行固定 3 列且需要等宽，可使用 flex: 1 配合 flex-wrap: wrap，当容器宽度不足以放下 3 列时会换行。
+
+更精确控制每行列数可使用 calc() 结合 flex-basis：flex: 1 1 calc(33.333% - 20px)，但需注意间距计算。
+
+新特性：gap 属性（flex、grid 均支持）可以方便地设置行列间距，无需再通过 margin hack。
+
+5. Grid 布局和 Flex 布局有什么区别？分别在什么场景下使用？
+考察点： 一维 vs 二维布局、适用场景
+
+答案要点：
+
+维度区别：
+
+Flex：一维布局，主要处理一个维度（行或列）的排列。可以在主轴和交叉轴控制，但本质上还是沿着一条线排列。
+
+Grid：二维布局，可以同时处理行和列，将容器划分为网格，项目可以放在任意单元格内。
+
+适用场景：
+
+Flex：适合组件内部的排列（如导航栏、按钮组、卡片列表），内容大小不确定，需要沿一个方向灵活伸缩的场景。
+
+Grid：适合整体页面布局（如大结构、仪表盘、图片墙），需要行列对齐，或者项目需要跨越多个行/列的场景。
+
+结合使用：实际开发中经常两者结合，Grid 负责宏观布局，Flex 负责微观组件。
+
+6. 如何使用 CSS Grid 实现一个经典的“圣杯布局”（header, footer, 三栏内容）？
+考察点： Grid 区域、响应式
+
+答案要点：
+
+html
+<div class="grid">
+  <header>Header</header>
+  <nav>Left</nav>
+  <main>Main</main>
+  <aside>Right</aside>
+  <footer>Footer</footer>
+</div>
+css
+.grid {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "nav    main   aside"
+    "footer footer footer";
+  grid-template-columns: 200px 1fr 200px; /* 左右固定，中间自适应 */
+  grid-template-rows: auto 1fr auto;       /* 头部底部根据内容高度，中间占满剩余 */
+  min-height: 100vh;
+}
+header { grid-area: header; }
+nav    { grid-area: nav;    }
+main   { grid-area: main;   }
+aside  { grid-area: aside;  }
+footer { grid-area: footer; }
+使用 grid-template-areas 可以直观地定义布局区域。
+
+响应式：在移动端可以通过媒体查询重新定义 grid-template-areas 和 grid-template-columns，例如让三栏堆叠。
+
+7. Tailwind CSS 中如何快速实现 Flex 布局？请列举常用的 Flex 相关类名。
+考察点： Tailwind 实用类、flex 系列
+
+答案要点：
+
+容器类：
+
+flex：display: flex
+
+inline-flex：display: inline-flex
+
+flex-row / flex-col：主轴方向（行/列）
+
+flex-wrap / flex-nowrap：换行控制
+
+justify-start / justify-center / justify-between / justify-around / justify-evenly：主轴对齐
+
+items-start / items-center / items-end / items-stretch / items-baseline：交叉轴对齐
+
+content-start / content-center / content-between：多行对齐（align-content）
+
+gap-{size}：设置间距（如 gap-4 表示 1rem）
+
+项目类：
+
+flex-initial / flex-1 / flex-auto / flex-none：对应 flex 简写
+
+grow / grow-0：flex-grow
+
+shrink / shrink-0：flex-shrink
+
+basis-{size}：flex-basis（如 basis-64 表示 16rem）
+
+order-{number}：order
+
+self-start / self-center / self-end：align-self
+
+示例：实现水平垂直居中
+
+html
+<div class="flex justify-center items-center h-screen">
+  <div>Centered</div>
+</div>
+8. 在 Tailwind 中如何实现响应式布局？例如在大屏时一行显示 4 列，在小屏时显示 2 列。
+考察点： 响应式断点、栅格系统
+
+答案要点：
+
+Tailwind 使用移动优先的断点前缀：
+
+sm: (640px)
+
+md: (768px)
+
+lg: (1024px)
+
+xl: (1280px)
+
+2xl: (1536px)
+
+实现示例：
+
+html
+<div class="flex flex-wrap -mx-2">
+  <div class="w-full sm:w-1/2 md:w-1/4 px-2">Item 1</div>
+  <div class="w-full sm:w-1/2 md:w-1/4 px-2">Item 2</div>
+  <div class="w-full sm:w-1/2 md:w-1/4 px-2">Item 3</div>
+  <div class="w-full sm:w-1/2 md:w-1/4 px-2">Item 4</div>
+</div>
+解释：
+
+默认（移动端）：w-full 占满一行。
+
+sm: 断点：sm:w-1/2 表示每行 2 列（宽度 50%）。
+
+md: 断点：md:w-1/4 表示每行 4 列（宽度 25%）。
+
+也可使用 Tailwind 的 Grid 工具类：grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4。
+
+9. 说说你对 BFC（块级格式化上下文）的理解，以及它如何帮助解决布局问题？
+考察点： BFC 概念、清除浮动、margin 塌陷
+
+答案要点：
+
+BFC 定义：BFC 是页面上的一个独立渲染区域，内部元素的布局不会影响外部元素。
+
+触发 BFC 的条件：
+
+float 不为 none
+
+position 为 absolute 或 fixed
+
+display 为 inline-block、flex、grid、table-cell 等
+
+overflow 不为 visible
+
+BFC 解决布局问题：
+
+清除浮动：父元素设置 overflow: hidden 或 display: flow-root，触发 BFC 后可以包含浮动子元素，避免高度塌陷。
+
+防止 margin 塌陷：两个相邻块级元素的上下 margin 可能合并，若其中一个触发 BFC，则不会合并。
+
+自适应两栏布局：左侧浮动，右侧触发 BFC 可避免环绕，实现自适应。
+
+10. 实现一个左侧固定宽度，右侧自适应的两栏布局，你能写出几种方法？
+考察点： 多种布局方案
+
+答案要点：
+
+Flex 方法（推荐）：
+
+css
+.container { display: flex; }
+.left { width: 200px; }
+.right { flex: 1; }
+Grid 方法：
+
+css
+.container { display: grid; grid-template-columns: 200px 1fr; }
+浮动 + margin 方法：
+
+css
+.left { float: left; width: 200px; }
+.right { margin-left: 200px; } /* 或 overflow: hidden 触发 BFC */
+绝对定位方法：
+
+css
+.container { position: relative; }
+.left { position: absolute; left: 0; width: 200px; }
+.right { margin-left: 200px; }
+calc 方法（配合浮动）：
+
+css
+.left { float: left; width: 200px; }
+.right { float: left; width: calc(100% - 200px); }
+表格布局（不推荐）：
+
+css
+.container { display: table; width: 100%; }
+.left, .right { display: table-cell; }
+.left { width: 200px; }
+
