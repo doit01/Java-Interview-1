@@ -3,6 +3,36 @@ Promise/Async async/await 是什么，解决了什么，注意事项是什么？
 async/await 是 Promise 的语法糖，让异步代码写起来像同步代码。错误处理推荐使用 try-catch，但要注意 try-catch 只能捕获 await 所在的错误，未 await 的 Promise 或回调中的错误仍需 .catch。
 同时要避免在循环中滥用 await 导致性能问题，可以用 Promise.all 并发执行。
 
+开始Vue 3项目
+    ↓
+选择构建工具(Vite)
+    ↓
+项目初始化 + 安装核心依赖
+    ├── Vue 3
+    ├── Vue Router (SPA需要)
+    ├── Pinia (状态管理)
+    └── Tailwind CSS
+    ↓
+配置Tailwind (tailwind.config.js)
+    ↓
+组件开发流程：
+    1. 创建.vue单文件组件
+    2. 使用<script setup>语法糖
+    3. 定义响应式数据(ref/reactive)
+    4. 计算属性(computed)和侦听器(watch)
+    5. 生命周期钩子(onMounted等)
+    6. 模板编写(结合Tailwind类)
+    7. 样式作用域(scoped或CSS模块)
+    ↓
+路由配置(如需)
+    ↓
+状态管理设计(如需)
+    ↓
+优化与打包
+
+
+
+
 浏览器原生功能：
 1 输入框聚焦了，父元素也该有反应。
 用focus-within
@@ -26,4 +56,15 @@ const uniqueID=Array.from(bytes).map(b=>b.toString(16).padStart(2,"0")).join("")
 6 别一做弹窗就装modal库。
 简单用<dialog>.
 它自带了对话框行为，焦点管理更自然，可访问性更好，背景区域会失活，ESC可关闭，不必靠一堆css，js拼出来。
+
+
+组合式API对比选项API ?
+https://chat.deepseek.com/share/ax5600ycq181ccngtq
+为什么组合式 API 更优？
+对比维度	选项式 API	组合式 API
+逻辑聚合	一个功能的代码（data/methods/mounted）散落在各处	 ;  所有相关代码（状态、方法、生命周期）写在一起，内聚性强
+逻辑复用	需要 mixins，存在命名冲突、隐式依赖等问题	 ; 封装成普通函数（useFetch），在任何组件中直接调用，清晰且无副作用
+TypeScript 支持	this 上下文类型推导困难 ; 	普通变量和函数，类型推断完美
+代码组织	文件变大后难以维护（上千行 options 混乱）	;按功能拆分多个 useXXX 函数，每个函数职责单一
+Tree Shaking	未使用的生命周期/选项无法被摇掉; 	只导入用到的 API（ref、onMounted），打包更小
 
