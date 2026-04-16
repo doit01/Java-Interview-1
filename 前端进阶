@@ -1,0 +1,23 @@
+浏览器原生功能：
+1 输入框聚焦了，父元素也该有反应。
+用focus-within
+2 对于没网络了情况，页面应该怎么办？
+浏览器最基础能力windows.addEventListener("offline")
+windows.addEventListener("online")
+3 不重要的任务慢慢跑：
+function showMessage(){
+console.log(" ran when browser was idle");
+}
+if("requstIdleCallback" in window){
+requstIdleCallback(showMessage)
+}
+适合：分析埋点，可以延迟的非关键任务，后台数据整理，琐碎工作。
+
+4 如何让组件根据自身容器尺寸来响应，而不是盯着整个屏幕视口？
+用container query。如：@用container （min-width:400px）
+5 唯一id 用const bytes=new Uint8Array(8);
+crypto.getRandomValues(bytes);
+const uniqueID=Array.from(bytes).map(b=>b.toString(16).padStart(2,"0")).join("");
+6 别一做弹窗就装modal库。
+简单用<dialog>.
+它自带了对话框行为，焦点管理更自然，可访问性更好，背景区域会失活，ESC可关闭，不必靠一堆css，js拼出来。
